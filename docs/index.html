@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>B95 Fuel Price Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">degalukaina.lt tracker</p>
+        <h1>B95 Fuel Price History</h1>
+        <p class="subtitle">Static GitHub Pages dashboard generated from the scraper's SQLite history.</p>
+      </div>
+      <button id="refreshBtn" type="button">Refresh data</button>
+    </header>
+
+    <section class="stats" aria-label="Summary">
+      <div class="card">
+        <span class="label">Stations</span>
+        <strong id="stationCount">-</strong>
+      </div>
+      <div class="card">
+        <span class="label">History rows</span>
+        <strong id="rowCount">-</strong>
+      </div>
+      <div class="card">
+        <span class="label">Last generated</span>
+        <strong id="generatedAt">-</strong>
+      </div>
+    </section>
+
+    <section class="panel controls">
+      <label>
+        Station
+        <select id="stationSelect"></select>
+      </label>
+      <label>
+        Search table
+        <input id="searchInput" type="search" placeholder="Brand, address, municipality..." />
+      </label>
+    </section>
+
+    <section class="panel">
+      <div class="panelTitle">
+        <h2>Historical B95 graph</h2>
+        <span id="chartHint"></span>
+      </div>
+      <div class="chartWrap">
+        <canvas id="priceChart" height="130"></canvas>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panelTitle">
+        <h2>Latest B95 prices</h2>
+        <span id="tableHint"></span>
+      </div>
+      <div class="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Brand</th>
+              <th>Address</th>
+              <th>Municipality</th>
+              <th>B95</th>
+              <th>Day</th>
+              <th>Updated</th>
+            </tr>
+          </thead>
+          <tbody id="latestBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel note">
+      <h2>How refresh works</h2>
+      <p>
+        GitHub Pages is static, so the browser cannot run the Python scraper or update the database.
+        The Refresh button reloads the latest committed <code>docs/data/fuel_prices.json</code> file.
+        To update prices automatically, run the included GitHub Actions workflow or run the scraper locally,
+        export JSON, and push the changed data file.
+      </p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
