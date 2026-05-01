@@ -31,6 +31,12 @@ from typing import Dict, List, Optional
 
 URL = "https://degalukaina.lt/"
 DB_PATH = "fuel_prices.db"
+MIN_PARSED_STATIONS = 10
+
+
+class ScrapeValidationError(RuntimeError):
+    """Raised when scraped data is incomplete or suspicious."""
+
 
 DEFAULT_STATIONS = [
     "Buivydiškių g. 5, Vilnius",
@@ -158,6 +164,47 @@ def find_stations(rows: List[Dict[str, object]], queries: List[str]) -> List[Dic
         for row in matches:
             found.append({"query": query, **row})
     return found
+
+
+def validate_scrape(
+    results: List[Dict[str, object]],
+    queries: List[str],
+    parsed_station_count: Optional[int] = None,
+    min_parsed_stations: int = MIN_PARSED_STATIONS,
+) -> None:
+    """Fail loudly when a scrape result looks incomplete.
+
+    The GitHub Action should not commit an empty/stale-looking export when the
+    source site changes layout, a configured station disappears, or B95 is not
+    available for a tracked station.
+    """
+    if parsed_station_count is not None and parsed_station_count < min_parsed_stations:
+        raise ScrapeValidationError(
+            f"Parsed only {parsed_station_count} station(s) from {URL}; expected at least {min_parsed_stations}. "
+            "The source page layout may have changed."
+        )
+
+    if not results:
+        raise ScrapeValidationError(
+            f"Parsed only 0 station(s) from {URL}; no matching stations found in scraped data."
+        )
+
+    station_text_fields = ["query", "brand", "address", "municipality"]
+    missing_queries = []
+    for query in queries:
+        q = norm(query)
+        if not any(q in norm(" ".join(str(row.get(k, "")) for k in station_text_fields)) for row in results):
+            missing_queries.append(query)
+    if missing_queries:
+        raise ScrapeValidationError("Missing configured station(s): " + "; ".join(missing_queries))
+
+    missing_b95 = [
+        f"{row.get('brand')} | {row.get('address')}"
+        for row in results
+        if row.get("b95") is None
+    ]
+    if missing_b95:
+        raise ScrapeValidationError("Tracked station(s) missing B95 price: " + "; ".join(missing_b95))
 
 
 def print_b95_table(rows: List[Dict[str, object]]) -> None:
@@ -291,6 +338,17 @@ def main() -> int:
     parser.add_argument("--date", help="Override history date as YYYY-MM-DD, mostly useful for testing/backfills")
     parser.add_argument("--json", action="store_true", help="Output current B95 results as JSON")
     parser.add_argument("--csv", action="store_true", help="Output current B95 results as CSV")
+    parser.add_argument(
+        "--allow-partial",
+        action="store_true",
+        help="Do not fail when configured stations or B95 prices are missing",
+    )
+    parser.add_argument(
+        "--min-parsed-stations",
+        type=int,
+        default=MIN_PARSED_STATIONS,
+        help=f"Minimum station rows expected from source HTML, default: {MIN_PARSED_STATIONS}",
+    )
     args = parser.parse_args()
 
     if args.history:
@@ -301,6 +359,13 @@ def main() -> int:
     page = fetch_html()
     rows = parse_rows(page)
     results = b95_only(find_stations(rows, queries))
+
+    if not args.allow_partial:
+        try:
+            validate_scrape(results, queries, parsed_station_count=len(rows), min_parsed_stations=args.min_parsed_stations)
+        except ScrapeValidationError as exc:
+            print(f"Scrape validation failed: {exc}", file=sys.stderr)
+            return 2
 
     if not args.no_save and results:
         saved = save_history(results, db_path=args.db, day=args.date)

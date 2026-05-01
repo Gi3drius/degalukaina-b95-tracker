@@ -56,6 +56,7 @@ In the GitHub repository:
 ## Automatic daily updates
 
 The included workflow `.github/workflows/update-fuel-prices.yml` can run daily and commit updated `fuel_prices.db` + `docs/data/fuel_prices.json`.
+It runs the test suite before scraping and fails instead of committing suspicious data if the source page layout changes, a configured station is missing, or a latest B95 price is empty.
 
 For the workflow to push commits, repository Actions permissions must allow write access:
 
@@ -66,5 +67,6 @@ You can also trigger it manually from the Actions tab with `workflow_dispatch`.
 ## Important GitHub Pages limitation
 
 GitHub Pages is static. It cannot run Python or write SQLite from the browser.
+The Reload latest data button in the page reloads the latest committed JSON data. For actual price updates, run the scraper locally and push, or use the GitHub Actions workflow.
 
-The Refresh button in the page reloads the latest committed JSON data. For actual price updates, run the scraper locally and push, or use the GitHub Actions workflow.
+A website button can only trigger the GitHub Action directly if it calls GitHub's `workflow_dispatch` API with a token that has repository write/workflow permission. Do not put that token in this static site: every visitor could extract it. To make a true "force refresh" button, put a small backend or serverless function in front of GitHub's API and keep the token server-side.

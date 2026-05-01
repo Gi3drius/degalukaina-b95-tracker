@@ -15,7 +15,7 @@
         <h1>B95 Fuel Price History</h1>
         <p class="subtitle">Static GitHub Pages dashboard generated from the scraper's SQLite history.</p>
       </div>
-      <button id="refreshBtn" type="button">Refresh data</button>
+      <button id="refreshBtn" type="button">Reload latest data</button>
     </header>
 
     <section class="stats" aria-label="Summary">
@@ -30,6 +30,14 @@
       <div class="card">
         <span class="label">Last generated</span>
         <strong id="generatedAt">-</strong>
+      </div>
+      <div class="card">
+        <span class="label">Last successful scrape</span>
+        <strong id="lastScrapeAt">-</strong>
+      </div>
+      <div class="card wide">
+        <span class="label">Source</span>
+        <strong><a id="sourceUrl" href="https://degalukaina.lt/" rel="noopener" target="_blank">degalukaina.lt</a></strong>
       </div>
     </section>
 
@@ -79,10 +87,16 @@
     <section class="panel note">
       <h2>How refresh works</h2>
       <p>
-        GitHub Pages is static, so the browser cannot run the Python scraper or update the database.
-        The Refresh button reloads the latest committed <code>docs/data/fuel_prices.json</code> file.
-        To update prices automatically, run the included GitHub Actions workflow or run the scraper locally,
-        export JSON, and push the changed data file.
+        GitHub Pages is static, so the browser cannot securely run the Python scraper or write to this repository.
+        <strong>Reload latest data</strong> only reloads the latest committed <code>docs/data/fuel_prices.json</code> file.
+      </p>
+      <p>
+        To force a new scrape, open the GitHub Actions workflow and run <strong>Update fuel prices</strong> manually.
+        A fully automatic website button would need a small backend/proxy with a protected GitHub token; putting that token
+        directly in this static page would expose repository write access to every visitor.
+      </p>
+      <p>
+        <a class="actionLink" href="https://github.com/Gi3drius/degalukaina-b95-tracker/actions/workflows/update-fuel-prices.yml" rel="noopener" target="_blank">Open manual GitHub Action</a>
       </p>
     </section>
   </main>

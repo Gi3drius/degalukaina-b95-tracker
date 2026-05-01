@@ -21,6 +21,12 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install test dependencies
+        run: python3 -m pip install pytest
+
+      - name: Run tests
+        run: python3 -m pytest -q
+
       - name: Scrape configured stations
         run: python3 scrape_degalukaina.py --db fuel_prices.db
 

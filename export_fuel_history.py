@@ -13,6 +13,11 @@ from typing import Any, Dict, List
 
 DEFAULT_DB = "fuel_prices.db"
 DEFAULT_OUTPUT = "docs/data/fuel_prices.json"
+DEFAULT_SOURCE_URL = "https://degalukaina.lt/"
+
+
+class ExportValidationError(RuntimeError):
+    """Raised when generated static data is incomplete or invalid."""
 
 
 def table_exists(con: sqlite3.Connection) -> bool:
@@ -42,7 +47,7 @@ def load_rows(db_path: str) -> List[Dict[str, Any]]:
         con.close()
 
 
-def build_payload(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
+def build_payload(rows: List[Dict[str, Any]], source_url: str = DEFAULT_SOURCE_URL) -> Dict[str, Any]:
     by_station: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
     for row in rows:
         station_key = f"{row['brand']} | {row['address']}"
@@ -65,9 +70,15 @@ def build_payload(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         latest.append(last)
 
     latest.sort(key=lambda r: (r.get("brand") or "", r.get("address") or ""))
+    last_successful_scrape_at = max(
+        (row.get("updated_at") or "" for row in rows),
+        default=None,
+    ) or None
 
     return {
         "generated_at": datetime.now().isoformat(timespec="seconds"),
+        "last_successful_scrape_at": last_successful_scrape_at,
+        "source_url": source_url,
         "fuel": "b95",
         "row_count": len(rows),
         "station_count": len(stations),
@@ -77,9 +88,25 @@ def build_payload(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     }
 
 
-def export_json(db_path: str, output_path: str) -> Dict[str, Any]:
+def validate_payload(payload: Dict[str, Any]) -> None:
+    if payload.get("row_count", 0) <= 0 or not payload.get("history"):
+        raise ExportValidationError("No history rows available for export.")
+    if payload.get("station_count", 0) <= 0 or not payload.get("stations"):
+        raise ExportValidationError("No stations available for export.")
+
+    missing_b95 = [
+        f"{row.get('brand')} | {row.get('address')}"
+        for row in payload.get("latest", [])
+        if row.get("b95") is None
+    ]
+    if missing_b95:
+        raise ExportValidationError("Latest row(s) missing B95 price: " + "; ".join(missing_b95))
+
+
+def export_json(db_path: str, output_path: str, source_url: str = DEFAULT_SOURCE_URL) -> Dict[str, Any]:
     rows = load_rows(db_path)
-    payload = build_payload(rows)
+    payload = build_payload(rows, source_url=source_url)
+    validate_payload(payload)
     os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
@@ -91,9 +118,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Export SQLite B95 history to static JSON")
     parser.add_argument("--db", default=DEFAULT_DB, help=f"SQLite DB path, default: {DEFAULT_DB}")
     parser.add_argument("--output", default=DEFAULT_OUTPUT, help=f"Output JSON path, default: {DEFAULT_OUTPUT}")
+    parser.add_argument("--source-url", default=DEFAULT_SOURCE_URL, help=f"Scraped source URL, default: {DEFAULT_SOURCE_URL}")
     args = parser.parse_args()
 
-    payload = export_json(args.db, args.output)
+    try:
+        payload = export_json(args.db, args.output, source_url=args.source_url)
+    except ExportValidationError as exc:
+        print(f"Export validation failed: {exc}")
+        return 2
     print(
         f"Exported {payload['row_count']} rows / {payload['station_count']} stations to {args.output}"
     )

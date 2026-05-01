@@ -34,6 +34,11 @@ function render() {
   el("stationCount").textContent = payload.station_count ?? 0;
   el("rowCount").textContent = payload.row_count ?? history.length;
   el("generatedAt").textContent = fmtDateTime(payload.generated_at);
+  el("lastScrapeAt").textContent = fmtDateTime(payload.last_successful_scrape_at);
+  if (payload.source_url) {
+    el("sourceUrl").href = payload.source_url;
+    el("sourceUrl").textContent = payload.source_url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+  }
 
   renderStationSelect(payload.stations || []);
   renderTable(latest);
@@ -177,14 +182,14 @@ function escapeHtml(value) {
 el("refreshBtn").addEventListener("click", async () => {
   const btn = el("refreshBtn");
   btn.disabled = true;
-  btn.textContent = "Refreshing...";
+  btn.textContent = "Reloading...";
   try {
     await loadData(true);
   } catch (err) {
     alert(err.message);
   } finally {
     btn.disabled = false;
-    btn.textContent = "Refresh data";
+    btn.textContent = "Reload latest data";
   }
 });
 
