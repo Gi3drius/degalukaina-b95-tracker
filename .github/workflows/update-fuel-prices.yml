@@ -3,8 +3,8 @@ name: Update fuel prices
 on:
   workflow_dispatch:
   schedule:
-    # Runs every day at 06:00 UTC. Adjust if needed.
-    - cron: "0 6 * * *"
+    # Runs hourly. GitHub may delay scheduled workflows during busy periods.
+    - cron: "0 * * * *"
 
 permissions:
   contents: write
