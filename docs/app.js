@@ -40,9 +40,60 @@ function render() {
     el("sourceUrl").textContent = payload.source_url.replace(/^https?:\/\//, "").replace(/\/$/, "");
   }
 
+  renderHeroMetrics(latest, history);
   renderStationSelect(payload.stations || []);
-  renderTable(latest);
+  renderTable();
+  renderLatestCards(filteredLatest());
   renderChart();
+}
+
+function renderHeroMetrics(latest, history) {
+  const priced = latest
+    .filter((row) => row.b95 !== null && row.b95 !== undefined && !Number.isNaN(Number(row.b95)))
+    .sort((a, b) => Number(a.b95) - Number(b.b95));
+
+  if (!priced.length) {
+    el("cheapestPrice").textContent = "-";
+    el("cheapestStation").textContent = "No latest B95 price available";
+    el("priceRange").textContent = "-";
+    el("latestDay").textContent = "-";
+    el("trendSummary").textContent = "Waiting for data";
+    return;
+  }
+
+  const cheapest = priced[0];
+  const highest = priced[priced.length - 1];
+  const days = [...new Set(latest.map((row) => row.day).filter(Boolean))].sort();
+
+  el("cheapestPrice").textContent = `${fmtPrice(cheapest.b95)} €/L`;
+  el("cheapestStation").textContent = stationLabel(cheapest);
+  el("priceRange").textContent = `${fmtPrice(cheapest.b95)}–${fmtPrice(highest.b95)} €`;
+  el("latestDay").textContent = days.at(-1) || "-";
+  el("trendSummary").textContent = trendSummary(history);
+}
+
+function trendSummary(history) {
+  const days = [...new Set(history.map((row) => row.day).filter(Boolean))].sort();
+  if (days.length < 2) return "Need more history";
+
+  const latestDay = days.at(-1);
+  const previousDay = days.at(-2);
+  const avgForDay = (day) => {
+    const values = history
+      .filter((row) => row.day === day && row.b95 !== null && row.b95 !== undefined)
+      .map((row) => Number(row.b95))
+      .filter((value) => !Number.isNaN(value));
+    if (!values.length) return null;
+    return values.reduce((sum, value) => sum + value, 0) / values.length;
+  };
+
+  const latestAvg = avgForDay(latestDay);
+  const previousAvg = avgForDay(previousDay);
+  if (latestAvg === null || previousAvg === null) return "Need more history";
+
+  const diff = latestAvg - previousAvg;
+  if (Math.abs(diff) < 0.005) return `Flat at ${fmtPrice(latestAvg)} €/L avg`;
+  return `${diff > 0 ? "Up" : "Down"} ${Math.abs(diff).toFixed(2)} €/L to ${fmtPrice(latestAvg)} €/L avg`;
 }
 
 function renderStationSelect(stations) {
@@ -94,7 +145,7 @@ function renderTable() {
       <td>${escapeHtml(row.brand)}</td>
       <td>${escapeHtml(row.address)}</td>
       <td>${escapeHtml(row.municipality || "-")}</td>
-      <td class="price">${fmtPrice(row.b95)}</td>
+      <td class="price">${fmtPrice(row.b95)} €/L</td>
       <td>${escapeHtml(row.day || "-")}</td>
       <td>${escapeHtml(fmtDateTime(row.updated_at))}</td>
     `;
@@ -102,6 +153,27 @@ function renderTable() {
   }
 
   el("tableHint").textContent = `${rows.length} row(s)`;
+}
+
+function renderLatestCards(rows) {
+  const wrap = el("latestCards");
+  wrap.innerHTML = "";
+
+  const sorted = [...rows].sort((a, b) => Number(a.b95 ?? Infinity) - Number(b.b95 ?? Infinity));
+  for (const row of sorted) {
+    const card = document.createElement("article");
+    card.className = "stationCard";
+    card.innerHTML = `
+      <strong>${escapeHtml(row.brand)}</strong>
+      <span class="cardPrice">${fmtPrice(row.b95)} €</span>
+      <small>${escapeHtml(row.address)}<br>${escapeHtml(row.municipality || "-")}</small>
+    `;
+    wrap.appendChild(card);
+  }
+
+  if (!sorted.length) {
+    wrap.innerHTML = `<article class="stationCard"><strong>No matches</strong><small>Try clearing filters.</small></article>`;
+  }
 }
 
 function renderChart() {
@@ -125,7 +197,10 @@ function renderChart() {
       data: labels.map((day) => rowsByDay.has(day) ? rowsByDay.get(day) : null),
       borderColor: colorFor(idx),
       backgroundColor: colorFor(idx, 0.16),
-      tension: 0.25,
+      pointRadius: selected === "__all__" ? 2 : 4,
+      pointHoverRadius: 6,
+      borderWidth: selected === "__all__" ? 2 : 3,
+      tension: 0.32,
       spanGaps: true,
     };
   });
@@ -142,14 +217,24 @@ function renderChart() {
       maintainAspectRatio: false,
       interaction: { mode: "index", intersect: false },
       plugins: {
-        legend: { labels: { color: "#e6edf3" } },
-        tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${fmtPrice(ctx.parsed.y)} €/L` } },
+        legend: {
+          position: "bottom",
+          labels: { color: "#d0d6e0", boxWidth: 10, boxHeight: 10, usePointStyle: true },
+        },
+        tooltip: {
+          backgroundColor: "rgba(15, 16, 17, .96)",
+          borderColor: "rgba(255,255,255,.12)",
+          borderWidth: 1,
+          titleColor: "#f7f8f8",
+          bodyColor: "#d0d6e0",
+          callbacks: { label: (ctx) => `${ctx.dataset.label}: ${fmtPrice(ctx.parsed.y)} €/L` },
+        },
       },
       scales: {
-        x: { ticks: { color: "#8b949e" }, grid: { color: "rgba(139, 148, 158, .15)" } },
+        x: { ticks: { color: "#8a8f98" }, grid: { color: "rgba(255, 255, 255, .06)" } },
         y: {
-          ticks: { color: "#8b949e", callback: (value) => `${Number(value).toFixed(2)} €` },
-          grid: { color: "rgba(139, 148, 158, .15)" },
+          ticks: { color: "#8a8f98", callback: (value) => `${Number(value).toFixed(2)} €` },
+          grid: { color: "rgba(255, 255, 255, .06)" },
         },
       },
     },
@@ -158,13 +243,13 @@ function renderChart() {
 
 function colorFor(index, alpha = 1) {
   const colors = [
-    [88, 166, 255],
-    [63, 185, 80],
-    [210, 153, 34],
-    [248, 81, 73],
-    [188, 140, 255],
-    [57, 211, 215],
-    [255, 166, 87],
+    [113, 112, 255],
+    [16, 185, 129],
+    [245, 158, 11],
+    [248, 113, 113],
+    [56, 189, 248],
+    [217, 70, 239],
+    [163, 230, 53],
   ];
   const c = colors[index % colors.length];
   return `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${alpha})`;
@@ -195,10 +280,14 @@ el("refreshBtn").addEventListener("click", async () => {
 
 el("stationSelect").addEventListener("change", () => {
   renderTable();
+  renderLatestCards(filteredLatest());
   renderChart();
 });
 
-el("searchInput").addEventListener("input", renderTable);
+el("searchInput").addEventListener("input", () => {
+  renderTable();
+  renderLatestCards(filteredLatest());
+});
 
 loadData().catch((err) => {
   console.error(err);
