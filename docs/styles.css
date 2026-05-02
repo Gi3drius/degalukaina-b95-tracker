@@ -77,7 +77,7 @@ button:disabled { opacity: .55; cursor: wait; }
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 14px;
 }
@@ -91,6 +91,29 @@ button:disabled { opacity: .55; cursor: wait; }
 
 .card {
   padding: 18px;
+  grid-column: span 1;
+}
+
+.card.wide {
+  grid-column: span 2;
+}
+
+a {
+  color: var(--accent);
+}
+
+.actionLink {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #2f81f7;
+  border-radius: 12px;
+  padding: 10px 14px;
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.actionLink:hover {
+  background: rgba(88, 166, 255, .12);
 }
 
 .label {
@@ -193,5 +216,6 @@ code {
 @media (max-width: 760px) {
   .hero, .panelTitle { align-items: stretch; flex-direction: column; }
   .stats, .controls { grid-template-columns: 1fr; }
+  .card, .card.wide { grid-column: span 1; }
   button { width: 100%; }
 }

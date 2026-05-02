@@ -3,8 +3,8 @@ name: Update fuel prices
 on:
   workflow_dispatch:
   schedule:
-    # Runs every day at 06:00 UTC. Adjust if needed.
-    - cron: "0 6 * * *"
+    # Runs hourly. GitHub may delay scheduled workflows during busy periods.
+    - cron: "0 * * * *"
 
 permissions:
   contents: write
@@ -20,6 +20,12 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Install test dependencies
+        run: python3 -m pip install pytest
+
+      - name: Run tests
+        run: python3 -m pytest -q
 
       - name: Scrape configured stations
         run: python3 scrape_degalukaina.py --db fuel_prices.db
