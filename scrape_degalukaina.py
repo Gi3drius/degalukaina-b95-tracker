@@ -6,6 +6,12 @@ Fast/simple approach: degalukaina.lt renders the fuel-price table directly in th
 homepage HTML, so this script only downloads the page and parses table rows.
 No Selenium/browser/API needed.
 
+Parser notes:
+- Current markup uses .stationName / .js-addr / .fuel.{diesel,b95,b98,lpg}.
+- Legacy .fw-semibold first-cell layout is still accepted as a fallback.
+- Address queries match by normalized token coverage so "Street, City" still hits
+  site rows formatted as "City, Street, ZIP".
+
 Usage:
   python3 scrape_degalukaina.py "Buivydiškių g. 5, Vilnius"
   python3 scrape_degalukaina.py Justiniškių g. 14B, Vilnius
@@ -70,6 +76,69 @@ def cell_price(cell_html: str) -> Optional[float]:
     return float(m.group(0).replace(",", ".")) if m else None
 
 
+def parse_brand_and_address(first_html: str) -> tuple[Optional[str], Optional[str]]:
+    """Extract brand/address from current or legacy degalukaina.lt table markup."""
+    # Current markup (2026): brand in .stationName, address in .js-addr.
+    brand_match = re.search(
+        r'<span[^>]*class=["\'][^"\']*\bstationName\b[^"\']*["\'][^>]*>(.*?)</span>',
+        first_html,
+        flags=re.I | re.S,
+    )
+    if not brand_match:
+        # Legacy markup: brand in Bootstrap fw-semibold span.
+        brand_match = re.search(
+            r'<span[^>]*class=["\'][^"\']*fw-semibold[^"\']*["\'][^>]*>(.*?)</span>',
+            first_html,
+            flags=re.I | re.S,
+        )
+    brand = strip_tags(brand_match.group(1)) if brand_match else None
+
+    addr_match = re.search(
+        r'<div[^>]*class=["\'][^"\']*\bjs-addr\b[^"\']*["\'][^>]*>(.*?)</div>',
+        first_html,
+        flags=re.I | re.S,
+    )
+    if addr_match:
+        addr_html = re.sub(r"<a\b.*?</a>", " ", addr_match.group(1), flags=re.I | re.S)
+        address = strip_tags(addr_html) or None
+    else:
+        # Legacy markup: address is leftover first-cell text after brand/map link.
+        first_no_links = re.sub(r"<a\b.*?</a>", " ", first_html, flags=re.I | re.S)
+        first_text = strip_tags(first_no_links)
+        if brand and first_text.startswith(brand):
+            address = first_text[len(brand) :].strip() or None
+        else:
+            address = first_text or None
+
+    # data-name on favorite button is a reliable brand fallback.
+    if not brand:
+        name_match = re.search(r'data-name=["\']([^"\']*)', first_html, flags=re.I)
+        if name_match:
+            brand = html.unescape(name_match.group(1)).strip() or None
+
+    return brand, address
+
+
+def parse_prices(cells: List[tuple[str, str]]) -> Dict[str, Optional[float]]:
+    """Parse diesel/b95/b98/lpg from table cells, preferring .fuel class spans."""
+    prices: Dict[str, Optional[float]] = {}
+    for i, fuel in enumerate(FUEL_COLUMNS):
+        if i + 1 >= len(cells):
+            prices[fuel] = None
+            continue
+        cell_html = cells[i + 1][1]
+        class_match = re.search(
+            rf'<span[^>]*class=["\'][^"\']*\bfuel\b[^"\']*\b{re.escape(fuel)}\b[^"\']*["\'][^>]*>(.*?)</span>',
+            cell_html,
+            flags=re.I | re.S,
+        )
+        if class_match:
+            prices[fuel] = cell_price(class_match.group(1))
+        else:
+            prices[fuel] = cell_price(cell_html)
+    return prices
+
+
 def parse_rows(page_html: str) -> List[Dict[str, object]]:
     rows: List[Dict[str, object]] = []
 
@@ -82,26 +151,8 @@ def parse_rows(page_html: str) -> List[Dict[str, object]]:
         place_match = re.search(r'data-place=["\']([^"\']*)', first_attrs, flags=re.I)
         municipality = html.unescape(place_match.group(1)) if place_match else None
 
-        brand_match = re.search(
-            r'<span[^>]*class=["\'][^"\']*fw-semibold[^"\']*["\'][^>]*>(.*?)</span>',
-            first_html,
-            flags=re.I | re.S,
-        )
-        brand = strip_tags(brand_match.group(1)) if brand_match else None
-
-        # Address is the text in the first cell after the brand, before the map link.
-        first_no_links = re.sub(r"<a\b.*?</a>", " ", first_html, flags=re.I | re.S)
-        first_text = strip_tags(first_no_links)
-        if brand and first_text.startswith(brand):
-            address = first_text[len(brand):].strip()
-        else:
-            address = first_text
-
-        prices = {
-            fuel: cell_price(cells[i + 1][1])
-            for i, fuel in enumerate(FUEL_COLUMNS)
-            if i + 1 < len(cells)
-        }
+        brand, address = parse_brand_and_address(first_html)
+        prices = parse_prices(cells)
 
         if brand and address:
             rows.append(
@@ -143,18 +194,42 @@ def get_queries(positional: List[str], station_options: Optional[List[str]]) -> 
     return [" ".join(positional)]
 
 
+def tokens(s: str) -> List[str]:
+    """Significant normalized tokens for loose address matching."""
+    return [t for t in norm(s).split() if t]
+
+
+def row_blob(row: Dict[str, object], keys: List[str]) -> str:
+    return norm(" ".join(str(row.get(k, "") or "") for k in keys))
+
+
+def row_matches_query(row: Dict[str, object], query: str) -> bool:
+    """Match when all query tokens appear in the target text (order-independent).
+
+    degalukaina.lt currently formats addresses as \"City, Street no, ZIP\", while
+    configured queries are often \"Street no, City\". Full-string containment fails
+    on that reorder, so require token coverage instead.
+    """
+    q_tokens = tokens(query)
+    if not q_tokens:
+        return False
+
+    addr = row_blob(row, ["address"])
+    if all(tok in addr.split() or tok in addr for tok in q_tokens):
+        # Prefer whole-token hits for short tokens like house numbers ("2", "8").
+        addr_toks = set(addr.split())
+        if all(tok in addr_toks for tok in q_tokens):
+            return True
+
+    full = row_blob(row, ["brand", "address", "municipality"])
+    full_toks = set(full.split())
+    return all(tok in full_toks for tok in q_tokens)
+
+
 def find_stations(rows: List[Dict[str, object]], queries: List[str]) -> List[Dict[str, object]]:
     found: List[Dict[str, object]] = []
     for query in queries:
-        q = norm(query)
-        matches = [row for row in rows if q in norm(str(row.get("address", "")))]
-        if not matches:
-            # fallback: allow matching across brand + address + municipality
-            matches = [
-                row
-                for row in rows
-                if q in norm(" ".join(str(row.get(k, "")) for k in ["brand", "address", "municipality"]))
-            ]
+        matches = [row for row in rows if row_matches_query(row, query)]
         for row in matches:
             found.append({"query": query, **row})
     return found
