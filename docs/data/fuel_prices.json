@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-21T06:29:36",
+  "generated_at": "2026-08-22T06:23:03",
   "fuel": "b95",
-  "row_count": 542,
+  "row_count": 549,
   "station_count": 13,
   "stations": [
     {
@@ -95,13 +95,13 @@
       "station_key": "Alauša | Buivydiškių g. 5, Vilnius"
     },
     {
-      "day": "2026-08-21",
+      "day": "2026-08-22",
       "query": "Vilniaus g. 8, Grigiškės",
       "brand": "Alauša",
       "address": "Grigiškės, Vilniaus g. 8, 27101",
       "municipality": "Vilniaus m. sav.",
-      "b95": 1.75,
-      "updated_at": "2026-08-21T06:29:36",
+      "b95": 1.7,
+      "updated_at": "2026-08-22T06:23:03",
       "station_key": "Alauša | Grigiškės, Vilniaus g. 8, 27101"
     },
     {
@@ -115,53 +115,53 @@
       "station_key": "Alauša | Vilniaus g. 8, Grigiškės"
     },
     {
-      "day": "2026-08-21",
+      "day": "2026-08-22",
       "query": "Buivydiškių g. 5, Vilnius",
       "brand": "Alauša",
       "address": "Vilnius, Buivydiškių g. 5, 07171",
       "municipality": "Vilniaus m. sav.",
-      "b95": 1.74,
-      "updated_at": "2026-08-21T06:29:36",
+      "b95": 1.67,
+      "updated_at": "2026-08-22T06:23:03",
       "station_key": "Alauša | Vilnius, Buivydiškių g. 5, 07171"
     },
     {
-      "day": "2026-08-21",
+      "day": "2026-08-22",
       "query": "Geležinio Vilko g. 63, Vilnius",
       "brand": "Neste",
       "address": "Vilnius, Geležinio Vilko g. 63, 08104",
       "municipality": "Vilniaus m. sav.",
-      "b95": 1.73,
-      "updated_at": "2026-08-21T06:29:36",
+      "b95": 1.72,
+      "updated_at": "2026-08-22T06:23:03",
       "station_key": "Neste | Vilnius, Geležinio Vilko g. 63, 08104"
     },
     {
-      "day": "2026-08-21",
+      "day": "2026-08-22",
       "query": "Justiniškių g. 14B, Vilnius",
       "brand": "Neste",
       "address": "Vilnius, Justiniškių g. 14B, 05131",
       "municipality": "Vilniaus m. sav.",
-      "b95": 1.76,
-      "updated_at": "2026-08-21T06:29:36",
+      "b95": 1.72,
+      "updated_at": "2026-08-22T06:23:03",
       "station_key": "Neste | Vilnius, Justiniškių g. 14B, 05131"
     },
     {
-      "day": "2026-08-21",
+      "day": "2026-08-22",
       "query": "Molėtų pl. 8, Vilnius",
       "brand": "Neste",
       "address": "Vilnius, Molėtų pl. 8, 08426",
       "municipality": "Vilniaus m. sav.",
-      "b95": 1.71,
-      "updated_at": "2026-08-21T06:29:36",
+      "b95": 1.7,
+      "updated_at": "2026-08-22T06:23:03",
       "station_key": "Neste | Vilnius, Molėtų pl. 8, 08426"
     },
     {
-      "day": "2026-08-21",
+      "day": "2026-08-22",
       "query": "Rygos g. 2, Vilnius",
       "brand": "Neste",
       "address": "Vilnius, Rygos g. 2, 05259",
       "municipality": "Vilniaus m. sav.",
-      "b95": 1.75,
-      "updated_at": "2026-08-21T06:29:36",
+      "b95": 1.74,
+      "updated_at": "2026-08-22T06:23:03",
       "station_key": "Neste | Vilnius, Rygos g. 2, 05259"
     },
     {
@@ -205,13 +205,13 @@
       "station_key": "Neste Lietuva | Rygos g. 2, Vilnius"
     },
     {
-      "day": "2026-08-21",
+      "day": "2026-08-22",
       "query": "Rygos g. 2, Vilnius",
       "brand": "Saurida",
       "address": "Vilnius, Rygos g. 2, 05264",
       "municipality": "Vilniaus m. sav.",
       "b95": null,
-      "updated_at": "2026-08-21T06:29:36",
+      "updated_at": "2026-08-22T06:23:03",
       "station_key": "Saurida | Vilnius, Rygos g. 2, 05264"
     }
   ],
@@ -5634,6 +5634,76 @@
       "municipality": "Vilniaus m. sav.",
       "b95": null,
       "updated_at": "2026-08-21T06:29:36",
+      "station_key": "Saurida | Vilnius, Rygos g. 2, 05264"
+    },
+    {
+      "day": "2026-08-22",
+      "query": "Vilniaus g. 8, Grigiškės",
+      "brand": "Alauša",
+      "address": "Grigiškės, Vilniaus g. 8, 27101",
+      "municipality": "Vilniaus m. sav.",
+      "b95": 1.7,
+      "updated_at": "2026-08-22T06:23:03",
+      "station_key": "Alauša | Grigiškės, Vilniaus g. 8, 27101"
+    },
+    {
+      "day": "2026-08-22",
+      "query": "Buivydiškių g. 5, Vilnius",
+      "brand": "Alauša",
+      "address": "Vilnius, Buivydiškių g. 5, 07171",
+      "municipality": "Vilniaus m. sav.",
+      "b95": 1.67,
+      "updated_at": "2026-08-22T06:23:03",
+      "station_key": "Alauša | Vilnius, Buivydiškių g. 5, 07171"
+    },
+    {
+      "day": "2026-08-22",
+      "query": "Geležinio Vilko g. 63, Vilnius",
+      "brand": "Neste",
+      "address": "Vilnius, Geležinio Vilko g. 63, 08104",
+      "municipality": "Vilniaus m. sav.",
+      "b95": 1.72,
+      "updated_at": "2026-08-22T06:23:03",
+      "station_key": "Neste | Vilnius, Geležinio Vilko g. 63, 08104"
+    },
+    {
+      "day": "2026-08-22",
+      "query": "Justiniškių g. 14B, Vilnius",
+      "brand": "Neste",
+      "address": "Vilnius, Justiniškių g. 14B, 05131",
+      "municipality": "Vilniaus m. sav.",
+      "b95": 1.72,
+      "updated_at": "2026-08-22T06:23:03",
+      "station_key": "Neste | Vilnius, Justiniškių g. 14B, 05131"
+    },
+    {
+      "day": "2026-08-22",
+      "query": "Molėtų pl. 8, Vilnius",
+      "brand": "Neste",
+      "address": "Vilnius, Molėtų pl. 8, 08426",
+      "municipality": "Vilniaus m. sav.",
+      "b95": 1.7,
+      "updated_at": "2026-08-22T06:23:03",
+      "station_key": "Neste | Vilnius, Molėtų pl. 8, 08426"
+    },
+    {
+      "day": "2026-08-22",
+      "query": "Rygos g. 2, Vilnius",
+      "brand": "Neste",
+      "address": "Vilnius, Rygos g. 2, 05259",
+      "municipality": "Vilniaus m. sav.",
+      "b95": 1.74,
+      "updated_at": "2026-08-22T06:23:03",
+      "station_key": "Neste | Vilnius, Rygos g. 2, 05259"
+    },
+    {
+      "day": "2026-08-22",
+      "query": "Rygos g. 2, Vilnius",
+      "brand": "Saurida",
+      "address": "Vilnius, Rygos g. 2, 05264",
+      "municipality": "Vilniaus m. sav.",
+      "b95": null,
+      "updated_at": "2026-08-22T06:23:03",
       "station_key": "Saurida | Vilnius, Rygos g. 2, 05264"
     }
   ]
