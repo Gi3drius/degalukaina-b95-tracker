@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-23T06:24:47",
+  "generated_at": "2026-08-24T06:37:31",
   "fuel": "b95",
-  "row_count": 556,
+  "row_count": 557,
   "station_count": 13,
   "stations": [
     {
@@ -205,13 +205,13 @@
       "station_key": "Neste Lietuva | Rygos g. 2, Vilnius"
     },
     {
-      "day": "2026-08-23",
+      "day": "2026-08-24",
       "query": "Rygos g. 2, Vilnius",
       "brand": "Saurida",
       "address": "Vilnius, Rygos g. 2, 05264",
       "municipality": "Vilniaus m. sav.",
       "b95": null,
-      "updated_at": "2026-08-23T06:24:47",
+      "updated_at": "2026-08-24T06:37:31",
       "station_key": "Saurida | Vilnius, Rygos g. 2, 05264"
     }
   ],
@@ -5774,6 +5774,16 @@
       "municipality": "Vilniaus m. sav.",
       "b95": null,
       "updated_at": "2026-08-23T06:24:47",
+      "station_key": "Saurida | Vilnius, Rygos g. 2, 05264"
+    },
+    {
+      "day": "2026-08-24",
+      "query": "Rygos g. 2, Vilnius",
+      "brand": "Saurida",
+      "address": "Vilnius, Rygos g. 2, 05264",
+      "municipality": "Vilniaus m. sav.",
+      "b95": null,
+      "updated_at": "2026-08-24T06:37:31",
       "station_key": "Saurida | Vilnius, Rygos g. 2, 05264"
     }
   ]
