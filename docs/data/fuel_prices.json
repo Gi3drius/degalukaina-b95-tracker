@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-11-21T13:55:26",
+  "generated_at": "2026-11-22T13:48:15",
   "fuel": "b95",
-  "row_count": 998,
+  "row_count": 1000,
   "station_count": 13,
   "stations": [
     {
@@ -95,13 +95,13 @@
       "station_key": "Alauša | Buivydiškių g. 5, Vilnius"
     },
     {
-      "day": "2026-11-21",
+      "day": "2026-11-22",
       "query": "Vilniaus g. 8, Grigiškės",
       "brand": "Alauša",
       "address": "Grigiškės, Vilniaus g. 8, 27101",
       "municipality": "Vilniaus m. sav.",
       "b95": 1.659,
-      "updated_at": "2026-11-21T13:55:26",
+      "updated_at": "2026-11-22T13:48:15",
       "station_key": "Alauša | Grigiškės, Vilniaus g. 8, 27101"
     },
     {
@@ -115,13 +115,13 @@
       "station_key": "Alauša | Vilniaus g. 8, Grigiškės"
     },
     {
-      "day": "2026-11-21",
+      "day": "2026-11-22",
       "query": "Buivydiškių g. 5, Vilnius",
       "brand": "Alauša",
       "address": "Vilnius, Buivydiškių g. 5, 07171",
       "municipality": "Vilniaus m. sav.",
       "b95": 1.619,
-      "updated_at": "2026-11-21T13:55:26",
+      "updated_at": "2026-11-22T13:48:15",
       "station_key": "Alauša | Vilnius, Buivydiškių g. 5, 07171"
     },
     {
@@ -10194,6 +10194,26 @@
       "municipality": "Vilniaus m. sav.",
       "b95": 1.619,
       "updated_at": "2026-11-21T13:55:26",
+      "station_key": "Alauša | Vilnius, Buivydiškių g. 5, 07171"
+    },
+    {
+      "day": "2026-11-22",
+      "query": "Vilniaus g. 8, Grigiškės",
+      "brand": "Alauša",
+      "address": "Grigiškės, Vilniaus g. 8, 27101",
+      "municipality": "Vilniaus m. sav.",
+      "b95": 1.659,
+      "updated_at": "2026-11-22T13:48:15",
+      "station_key": "Alauša | Grigiškės, Vilniaus g. 8, 27101"
+    },
+    {
+      "day": "2026-11-22",
+      "query": "Buivydiškių g. 5, Vilnius",
+      "brand": "Alauša",
+      "address": "Vilnius, Buivydiškių g. 5, 07171",
+      "municipality": "Vilniaus m. sav.",
+      "b95": 1.619,
+      "updated_at": "2026-11-22T13:48:15",
       "station_key": "Alauša | Vilnius, Buivydiškių g. 5, 07171"
     }
   ]
